@@ -1,0 +1,78 @@
+﻿
+@{
+    ViewData["Title"] = "Chat Page";
+}
+
+<div class="container ">
+    <h1 class="text-center mb-4">Chat Room</h1>
+    <section class="row ">
+        <div id="nameCtrl">
+            <div class="text-center d-flex justify-content-center" >
+                <input class="form-control w-25 me-2" placeholder="Enter Your Name" type="text" id="userName" />
+                <input class="btn btn-primary" type="button" onclick="saveName()" value="Enter" />
+             
+            </div>
+            <p id="errorMessage" class="text-danger m-auto col-4"></p>
+        </div>
+    
+
+        <div  id="msgCtrl">
+            <div class="text-center d-flex justify-content-center" >
+                <input class="form-control w-25 me-2" type="text" id="message" placeholder="Enter your message" />
+                <input class="btn btn-primary" type="button" onclick="send()" value="Send" />
+              
+            </div>
+            <div class="mt-5"><p class="text-success fs-3 w-50 m-auto text-center">Messages</p></div>
+            <ul class="list-group mt-2 w-50 m-auto" id="list">
+                
+            </ul>
+        </div>
+    
+    </section>
+
+</div>
+
+
+
+
+
+
+
+@section Scripts{
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script>
+        var connection;
+        var clientName;
+        $(function () {
+            document.getElementById("msgCtrl").style.display = 'none';
+
+            connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+
+            connection.start();
+
+            connection.on("messageTosend", function (message, name) {
+                $("#list").append("<li>" + name + ": " + message + "</li>");
+            });
+
+        })
+
+        function send() {
+            connection.invoke("sendMessage", $("#message").val(), clientName);
+            document.getElementById("message").value = '';
+        }
+
+        function saveName(){
+
+           clientName = document.getElementById("userName").value;
+            if(clientName){
+                document.getElementById("nameCtrl").style.display = 'none'
+                document.getElementById("msgCtrl").style.display = 'block';
+            }
+            else{
+                let element = document.getElementById("errorMessage");
+                element.append("Please enter your name");
+            }
+   
+        }
+    </script>
+    }
